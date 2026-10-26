@@ -1,0 +1,1061 @@
+{
+ "uid": "pipeline-health",
+ "title": "Bank medallion pipeline - health, quality & alerts",
+ "tags": [
+  "pipeline",
+  "monitoring"
+ ],
+ "timezone": "browser",
+ "schemaVersion": 39,
+ "version": 1,
+ "refresh": "1m",
+ "time": {
+  "from": "now-14d",
+  "to": "now"
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "row",
+   "title": "Last run",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "Last run status",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT status FROM obs.run_summary ORDER BY finished_at DESC LIMIT 1"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "/^(status|pass_rate|critical_failures|warnings)$/",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "mappings": [
+      {
+       "type": "value",
+       "options": {
+        "SUCCESS": {
+         "color": "green",
+         "text": "SUCCESS"
+        },
+        "FAILED": {
+         "color": "red",
+         "text": "FAILED"
+        }
+       }
+      }
+     ],
+     "unit": "none",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "DQ pass rate (last run)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 6,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT round(100.0*checks_passed/NULLIF(checks_total,0),1) AS pass_rate FROM obs.run_summary ORDER BY finished_at DESC LIMIT 1"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "/^(status|pass_rate|critical_failures|warnings)$/",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "mappings": [],
+     "unit": "percent",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "red",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 95
+       },
+       {
+        "color": "green",
+        "value": 100
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 4,
+   "type": "stat",
+   "title": "Critical DQ failures (last run)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT critical_failures FROM obs.run_summary ORDER BY finished_at DESC LIMIT 1"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "/^(status|pass_rate|critical_failures|warnings)$/",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "mappings": [],
+     "unit": "none",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 5,
+   "type": "stat",
+   "title": "DQ warnings (last run)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 18,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT warnings FROM obs.run_summary ORDER BY finished_at DESC LIMIT 1"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "/^(status|pass_rate|critical_failures|warnings)$/",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "mappings": [],
+     "unit": "none",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "orange",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 6,
+   "type": "row",
+   "title": "Pipeline performance",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 5,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Task duration (seconds)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 6,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, task_id AS metric, value FROM obs.task_metrics WHERE metric='duration_seconds' AND task_id <> 'pipeline' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "End-to-end run duration (seconds)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 6,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, 'pipeline' AS metric, value FROM obs.task_metrics WHERE task_id='pipeline' AND metric='duration_seconds' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 9,
+   "type": "timeseries",
+   "title": "Peak memory per task (MB, approx.)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, task_id AS metric, value FROM obs.task_metrics WHERE metric='peak_rss_mb' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 10,
+   "type": "timeseries",
+   "title": "Run outcomes (1 = run, by status)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 14,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT finished_at AS time, status AS metric, 1 AS value FROM obs.run_summary WHERE $__timeFilter(finished_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 25,
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 11,
+   "type": "row",
+   "title": "Data volume",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 22,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 12,
+   "type": "timeseries",
+   "title": "Rows per Silver table",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 23,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, table_name AS metric, value FROM obs.task_metrics WHERE task_id='silver_clean' AND metric='rows' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 13,
+   "type": "timeseries",
+   "title": "Quarantine share by table (%)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 23,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, table_name AS metric, value FROM obs.task_metrics WHERE task_id='dq_silver_stats' AND metric='quarantine_pct' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 14,
+   "type": "timeseries",
+   "title": "Rows per Gold table",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 31,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, table_name AS metric, value FROM obs.task_metrics WHERE task_id IN ('gold_dimensions','gold_facts') AND metric='rows' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 15,
+   "type": "timeseries",
+   "title": "Mean amounts (drift watch)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 31,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT recorded_at AS time, table_name || '.' || metric AS metric, value FROM obs.task_metrics WHERE task_id='dq_silver_stats' AND metric LIKE 'avg_%' AND $__timeFilter(recorded_at) ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 16,
+   "type": "row",
+   "title": "Data quality",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 39,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 17,
+   "type": "timeseries",
+   "title": "Failed DQ checks per run, by severity",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 40,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "time_series",
+     "rawSql": "SELECT min(recorded_at) AS time, severity AS metric, count(*) AS value FROM obs.dq_results WHERE NOT passed AND $__timeFilter(recorded_at) GROUP BY run_id, severity ORDER BY 1"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 25,
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 18,
+   "type": "table",
+   "title": "Failed checks - latest run",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 40,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT layer, table_name AS \"table\", severity, check_name AS \"check\", observed, threshold FROM obs.dq_results WHERE NOT passed AND run_id = (SELECT run_id FROM obs.run_summary ORDER BY finished_at DESC LIMIT 1) ORDER BY CASE severity WHEN 'CRITICAL' THEN 0 ELSE 1 END, id"
+    }
+   ],
+   "options": {
+    "showHeader": true
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   }
+  },
+  {
+   "id": 19,
+   "type": "row",
+   "title": "Alerts",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 48,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 20,
+   "type": "table",
+   "title": "Recent alerts",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 49,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT recorded_at AS time, severity, title, delivered, task_id FROM obs.alerts ORDER BY id DESC LIMIT 30"
+    }
+   ],
+   "options": {
+    "showHeader": true
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   }
+  },
+  {
+   "id": 21,
+   "type": "table",
+   "title": "Delta table health (latest)",
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "obs-pg"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 49,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "obs-pg"
+     },
+     "rawQuery": true,
+     "editorMode": "code",
+     "format": "table",
+     "rawSql": "SELECT DISTINCT ON (table_name, metric) table_name AS \"table\", metric, value FROM obs.task_metrics WHERE task_id='table_health_stats' ORDER BY table_name, metric, recorded_at DESC"
+    }
+   ],
+   "options": {
+    "showHeader": true
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   }
+  },
+  {
+   "id": 22,
+   "type": "row",
+   "title": "Airflow internals (Prometheus)",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 57,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 23,
+   "type": "timeseries",
+   "title": "Scheduler heartbeat (per second)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 58,
+    "w": 8,
+    "h": 7
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prom"
+     },
+     "expr": "rate(airflow_scheduler_heartbeat[5m])",
+     "legendFormat": "{{task_id}}"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 24,
+   "type": "timeseries",
+   "title": "Task failures (last hour)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 58,
+    "w": 8,
+    "h": 7
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prom"
+     },
+     "expr": "sum by (task_id) (increase(airflow_ti_finish{state=\"failed\"}[1h]))",
+     "legendFormat": "{{task_id}}"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 25,
+   "type": "timeseries",
+   "title": "DAG import errors",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 58,
+    "w": 8,
+    "h": 7
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prom"
+     },
+     "expr": "airflow_dag_processing_import_errors",
+     "legendFormat": "{{task_id}}"
+    }
+   ],
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   }
+  }
+ ]
+}

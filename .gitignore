@@ -1,0 +1,16 @@
+venv/
+.env
+__pycache__/
+*.pyc
+data/
+out/
+output/
+*.parquet
+*.crc
+_SUCCESS
+*.zip
+spark-warehouse/
+metastore_db/
+lake/
+lakehouse/
+logs/

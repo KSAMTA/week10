@@ -1,0 +1,23 @@
+# Infrastructure-level rules. They show up in Prometheus -> Alerts (http://localhost:9090/alerts) and can be
+# routed to e-mail/Teams later by adding Alertmanager. Data-quality and run failures are alerted by Airflow itself
+# (include/alerting.py); these cover the cases Airflow can't report on its own.
+groups:
+  - name: airflow-health
+    rules:
+      - alert: SchedulerHeartbeatMissing
+        expr: (increase(airflow_scheduler_heartbeat[5m]) == 0) or absent(airflow_scheduler_heartbeat)
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Airflow scheduler has not sent a heartbeat for 5 minutes - scheduled runs will not start"
+      - alert: PipelineTaskFailed
+        expr: increase(airflow_ti_finish{state="failed"}[1h]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "Task {{ $labels.task_id }} of {{ $labels.dag_id }} failed in the last hour"
+      - alert: DagImportErrors
+        expr: airflow_dag_processing_import_errors > 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Airflow cannot parse one or more DAG files"
